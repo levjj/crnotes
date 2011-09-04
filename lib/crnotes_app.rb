@@ -5,7 +5,7 @@ require 'yaml'
 require 'openid'
 require 'openid/store/filesystem'
 require 'openid/extensions/ax'
-require 'crtodo'
+require 'crnotes'
 
 PROVIDERS = {"google" => "https://www.google.com/accounts/o8/id",
             "yahoo" => "http://www.yahoo.com/"}
@@ -16,7 +16,7 @@ LIBDIR = File.dirname(File.expand_path(__FILE__))
 CONFIGFILE = File.join(LIBDIR, "..", CONFIGFILENAME)
 OPENIDDIR =  File.join(LIBDIR, "..", "openid")
 
-module CRToDo
+module CRNotes
 	class Application < Sinatra::Application
 		def initialize
 			super

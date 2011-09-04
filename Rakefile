@@ -12,10 +12,18 @@ PROJECT_NAME = 'CRNotes'
 SRC_FILES = FileList.new('lib/*.rb')
 TEST_FILES = FileList.new('spec/*_spec.rb')
 
-desc "Runs CRNotes server with thin"
-task :run do |t|
-	ARGV.shift()
-	exec "thin -C thin.yml -R config.ru #{ARGV.join(' ')}"
+desc "Starts CRNotes server with thin"
+task :start do |t|
+	exec "thin -C thin.yml -R config.ru start"
+end
+
+desc "Stops CRNotes server with thin"
+task :stop do |t|
+	exec "thin -C thin.yml -R config.ru stop"
+end
+
+desc "Restarts CRNotes server with thin"
+task :restart  => [:stop, :start] do |t|
 end
 
 desc "Test the application"

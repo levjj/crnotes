@@ -1,3 +1,6 @@
 doc
 openid
 config.yml
+thin.log
+thin.pid
+thin.yml
