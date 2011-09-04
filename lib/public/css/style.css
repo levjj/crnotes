@@ -1,0 +1,163 @@
+html, body {
+	margin: 0;
+	padding: 0;
+}
+body {
+	font-family: sans-serif;
+	font-size: 14px;
+	color: #333;
+    text-align: left;
+	background: #fff;
+}
+a {
+	color: #333;
+	text-decoration: underline;
+}
+h1 {
+	font-size: 170%;
+}
+h2 {
+	font-size: 140%;
+}
+
+#header {
+	width:100%;
+	height: 70px;
+	overflow:hidden;
+	background: #555;
+}
+
+#header h1 {
+	margin: 20px;
+	color: #fff;
+	float: left;
+}
+
+#header p.icons,
+#header p.icons a {
+	color: #888;
+	font-size: 12px;
+}
+
+#header p {
+	text-align: right;
+	color: #fff;
+	margin-top: 5px;
+	margin-right: 20px;
+}
+
+#header p a {
+	color: #fff;
+}
+
+#main {
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-top: 10px;
+	min-width: 540px;
+}
+
+ul.todolist li,
+div.expander p,
+div.expander a {
+	list-style-type: none;
+	margin: 6px;
+	padding: 5px;
+}
+
+ul.todolist {
+	padding: 0;
+	margin: 0;
+	width: 400px;
+}
+
+ul.todolist li input {
+	float: right;
+}
+
+div.expander {
+	clear: both;
+	width: 420px;
+}
+
+#loginbox {
+	width: 160px;
+}
+
+#loginbox legend {
+	font-size: 120%;
+}
+
+.todoinput {
+	width: 314px;
+	margin-left: 6px;
+	margin-right: 10px;
+}
+
+.todogroup {
+	float: left;
+	padding-top: 9px;
+	padding: 4px;
+	margin: 6px;
+}
+
+.tododrop {
+	height: 48px;
+	margin-top: 9px;
+	padding: 0px;
+}
+
+div.finish {
+	background-image: url(/images/ok.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
+}
+
+div.finish-hover {
+	background-image: url(/images/ok-highlight.png);
+}
+
+div.trash {
+	background-image: url(/images/trash.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
+}
+
+div.trash-hover {
+	background-image: url(/images/trash-highlight.png);
+}
+
+div.left {
+	float: left;
+}
+
+div.right {
+	margin-left: 430px;
+	margin-right: 0px;
+}
+
+div#footer {
+	clear: both;
+}
+
+.todoentry {
+	cursor: move;
+}
+
+div.description {
+	width: 450px;
+	display: block;
+	float: left;
+	padding: 10px;
+	margin: 6px;
+}
+div.login {
+	width: 200px;
+	display: block;
+	float: left;
+	padding: 10px;
+	margin: 6px;
+}
+p.ind {
+	margin-left: 15px;
+}
