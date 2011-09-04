@@ -29,7 +29,7 @@ module CRNotes
 		end
 		
 		def create(name)
-			@id = CRToDo::next_id(@redis, "todolist")
+			@id = CRNotes::next_id(@redis, "note")
 			@redis[@id + NAME_SUFFIX] = @name = name
 			@redis[@id + TEXT_SUFFIX] = @text = ""
 		end
@@ -52,7 +52,6 @@ module CRNotes
 			@redis.del @id + TEXT_SUFFIX
 		end
 		
-		
 		def self.safe_name?(name)
 			return name.length > 0 &&
 			       name.length < 255 &&
@@ -72,7 +71,7 @@ module CRNotes
 		end
 		
 		def create(name)
-			@id = CRToDo::next_id(@redis, "user")
+			@id = CRNotes::next_id(@redis, "user")
 			self.name = name
 		end
 		
@@ -107,7 +106,7 @@ module CRNotes
 			return nil unless Note.safe_name? newname
 			note = @notes.delete(oldname)
 			note.name = newname
-			@notes[newname] = list
+			@notes[newname] = note
 			@redis.hdel @id + NOTES_SUFFIX, oldname
 			@redis.hset @id + NOTES_SUFFIX, newname, note.id
 			return newname
@@ -118,7 +117,7 @@ module CRNotes
 		end
 
 		def delete
-			@notes.values.each {|l| l.delete}
+			@notes.values.each {|n| n.delete}
 			@redis.del @id + NAME_SUFFIX
 			@redis.del @id + NOTES_SUFFIX
 		end
@@ -144,7 +143,7 @@ module CRNotes
 		end
 
 		def add_user(username)
-			return nil unless User.safe_name? username
+			return nil unless Note.safe_name? username
 			@users[username] = User.new(@redis, username, true)
 			@redis.hset USERS_KEY, username, @users[username].id
 			return username

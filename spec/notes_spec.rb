@@ -89,22 +89,13 @@ describe CRNotes::User do
 		@user.notes.empty?.should == true
 	end
 
-	it "stores newly created todolists with one entry" do
-		@todouser.add_list LIST1
-		@todouser.lists.size.should == 1
-		list = @todouser.lists[LIST1]
-		list.add_todo TODO2
-		list.name.should == LIST1
-		list.entries.size.should == 1
-	end
-
 	it "supports renaming of notes" do
-		@user.add_note LIST1
+		@user.add_note NOTE1
 		@user.notes.size.should == 1
-		@user.notes.values[0].name.should == LIST1
+		@user.notes.values[0].name.should == NOTE1
 		@user.rename_note(NOTE1, NOTE1 + "2")
 		@user.notes.size.should == 1
-		@user.notes.values[0].name.should == LIST1 + "2"
+		@user.notes.values[0].name.should == NOTE1 + "2"
 		@redis.dbsize.should == 6
 	end
 
@@ -157,7 +148,7 @@ describe CRNotes::DB do
 		@db.users.size.should == 1
 		user = @db.users[TESTUSER]
 		user.name.should == TESTUSER
-		user.lists.empty?.should == true
+		user.notes.empty?.should == true
 		@redis.dbsize.should == 3
 	end
 
