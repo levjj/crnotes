@@ -30,7 +30,9 @@ module CRNotes
 				else
 					rcnf = cnf["redis"]
 					begin
-						@db = CRNotes::DB.new(rcnf["host"], rcnf["port"], rcnf["db"])
+						@redis = Redis.new :host => rcnf["host"],
+						                   :port => rcnf["port"],
+						                   :db => rcnf["db"]
 						@store = OpenID::Store::Filesystem.new(OPENIDDIR)
 					rescue Exception => e
 						@configerror = e.to_s
@@ -118,6 +120,7 @@ module CRNotes
 				@error = @configerror.to_s
 				halt erb :error
 			elsif logged_in? then
+				@db = CRNotes::DB.new @redis
 				@model = @db.get_user session[:user]
 				@notenames = @model.notes.keys
 			end

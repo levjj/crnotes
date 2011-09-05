@@ -126,8 +126,8 @@ end
 
 describe CRNotes::DB do
 	before(:each) do
-		@db = CRNotes::DB.new '127.0.0.1', '6379', 3
-		@redis = @db.redis
+		@redis = Redis.new :host => '127.0.0.1', :port => '6379', :db => 3
+		@db = CRNotes::DB.new @redis
 		@redis.flushdb
 	end
 
