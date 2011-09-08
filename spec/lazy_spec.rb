@@ -13,7 +13,7 @@ describe CRNotes, "lazy loading" do
 		@redis.flushdb
 		user = db.get_user USER
 		user.add_note NOTE
-		user.notes[NOTE].text = TEXT
+		user.notes.values.first.text = TEXT
 	end
 	
 	before(:each) do
@@ -37,11 +37,11 @@ describe CRNotes, "lazy loading" do
 	end
 
 	it "does not load individual notes" do
-		@db.users[USER].notes[NOTE].loaded?.should == false
+		@db.users[USER].notes.values.first.loaded?.should == false
 	end
 
 	it "loads the todo list upon accessing the text" do
-		note = @db.users[USER].notes[NOTE]
+		note = @db.users[USER].notes.values.first
 		note.text.empty?.should == false
 		note.loaded?.should == true
 	end

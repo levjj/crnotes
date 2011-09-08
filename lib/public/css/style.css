@@ -6,8 +6,8 @@ body {
 	font-family: sans-serif;
 	font-size: 14px;
 	color: #333;
-    text-align: left;
-	background: #fff;
+  text-align: left;
+	background: #ddd;
 }
 a {
 	color: #333;
@@ -57,74 +57,12 @@ h2 {
 	min-width: 540px;
 }
 
-ul.todolist li,
-div.expander p,
-div.expander a {
-	list-style-type: none;
-	margin: 6px;
-	padding: 5px;
-}
-
-ul.todolist {
-	padding: 0;
-	margin: 0;
-	width: 400px;
-}
-
-ul.todolist li input {
-	float: right;
-}
-
-div.expander {
-	clear: both;
-	width: 420px;
-}
-
 #loginbox {
 	width: 160px;
 }
 
 #loginbox legend {
 	font-size: 120%;
-}
-
-.todoinput {
-	width: 314px;
-	margin-left: 6px;
-	margin-right: 10px;
-}
-
-.todogroup {
-	float: left;
-	padding-top: 9px;
-	padding: 4px;
-	margin: 6px;
-}
-
-.tododrop {
-	height: 48px;
-	margin-top: 9px;
-	padding: 0px;
-}
-
-div.finish {
-	background-image: url(/images/ok.png);
-	background-repeat: no-repeat;
-	background-position: 0 0;
-}
-
-div.finish-hover {
-	background-image: url(/images/ok-highlight.png);
-}
-
-div.trash {
-	background-image: url(/images/trash.png);
-	background-repeat: no-repeat;
-	background-position: 0 0;
-}
-
-div.trash-hover {
-	background-image: url(/images/trash-highlight.png);
 }
 
 div.left {
@@ -140,24 +78,86 @@ div#footer {
 	clear: both;
 }
 
-.todoentry {
-	cursor: move;
-}
-
 div.description {
 	width: 450px;
-	display: block;
 	float: left;
-	padding: 10px;
-	margin: 6px;
 }
+
 div.login {
 	width: 200px;
-	display: block;
 	float: left;
-	padding: 10px;
-	margin: 6px;
 }
+
+div.box {
+	display: block;
+	padding-top: 10px;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-bottom: 10px;
+	margin: 8px;
+  background-color: white;
+  border-radius: 15px;
+}
+
 p.ind {
 	margin-left: 15px;
 }
+
+div#notelist {
+  float: left;
+  width: 200px;
+}
+
+div#notelist a {
+	text-decoration: none;
+}
+
+div#notelist ul {
+  padding: 0;
+  margin-top: 8px;
+  margin-bottom: 15px;
+  margin-left: 0;
+  margin-right: 0;
+  text-indent: 0;
+  list-style-type: none;
+  width: 100%;
+}
+
+div#notelist li {
+  padding: 0;
+  margin-left: -20px;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  text-indent: 0;
+  font-size: 110%;
+  line-height: 150%;
+}
+
+div#notelist li a {
+  padding-left: 20px;
+  display: block;
+  width: 220px;
+}
+
+div#notelist li a:hover {
+  background-color: #555;
+  color: white;
+}
+
+div#notelist li a.active {
+  background-color: #eee;
+  color: #333;
+}
+
+div#editbox {
+  margin-left: 265px;
+  display: none;
+}
+.goodstatus {
+  background-color: #cfc;
+}
+.badstatus {
+  background-color: #fcc;
+}
+

@@ -116,21 +116,14 @@ module CRNotes
 		end
 
 		before do
-			if @configerror then
-				@error = @configerror.to_s
-				halt erb :error
-			elsif logged_in? then
+		  if @configerror then
+				raise @configerror
+		  elsif request.path_info =~ /^(\/)?log/ then
+			elsif not logged_in? then
+				redirect '/login'
+			else
 				@db = CRNotes::DB.new @redis
 				@model = @db.get_user session[:user]
-				@notenames = @model.notes.keys
-			end
-		end
-
-		get '/*' do
-			if logged_in? then
-				pass
-			else
-				redirect '/login'
 			end
 		end
 		
@@ -143,23 +136,26 @@ module CRNotes
 		end
 
 		post '/api/' do
-			@model.add_note params[:note]
+			request.body.rewind
+			data = JSON.parse request.body.read
+			@model.add_note(data["name"]).to_json
 		end
 
-		put '/api/:name' do |name|
-			@model.rename_note(name, params["newname"])
+		get '/api/:id' do |id|
+			@model.notes[id].to_json
 		end
 
-		delete '/api/:name' do |name|
-			@model.delete_note name
+		put '/api/:id' do |id|
+			request.body.rewind
+			data = JSON.parse request.body.read
+			note = @model.notes[id]
+			note.name = data["name"] unless data["name"].nil?
+			note.text = data["text"] unless data["text"].nil?
+			note.to_json
 		end
-
-		get '/api/:name/text' do |name|
-			@model.notes[name].text
-		end
-
-		put '/api/:name/text' do |name|
-			@model.notes[name].text = params["newtext"]
+		
+		delete '/api/:id' do |id|
+			@model.delete_note id
 		end
 	end
 end

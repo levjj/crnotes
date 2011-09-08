@@ -4,41 +4,45 @@ require 'fileutils'
 
 module CRNotes
 
-	LASTID_SUFFIX = "_lastid"
+	LASTID_SUFFIX = "lastid"
 	NAME_SUFFIX = "_name"
 	TEXT_SUFFIX = "_text"
 	NOTES_SUFFIX = "_notes"
 	USERS_KEY = "users"
 	
+	USER_KEY = "user_"
+	NOTE_KEY = "note_"
+	
 	def self.next_id(redis, scheme)
-		scheme + "_" + redis.incr(scheme + LASTID_SUFFIX).to_s
+		redis.incr(scheme + LASTID_SUFFIX).to_s
 	end
 	
 	def self.del_idcounters(redis)
-		redis.del "note" + LASTID_SUFFIX
-		redis.del "user" + LASTID_SUFFIX
+		redis.del USER_KEY + LASTID_SUFFIX
+		redis.del NOTE_KEY + LASTID_SUFFIX
 	end
 	
 	class Note
 		attr_reader :id, :name, :text
 
-		def initialize(redis, id, new = false)
+		def initialize(redis, id, name = nil)
 			@redis = redis
 			@loaded = false
-			@id = id
-			create id if new
+			@id = id.nil? ? create(name) : id
 		end
 		
 		def create(name)
-			@id = CRNotes::next_id(@redis, "note")
-			@redis[@id + NAME_SUFFIX] = @name = name
-			@redis[@id + TEXT_SUFFIX] = @text = ""
+			raise "Unsafe name" unless Note.safe_name?(name)
+			@id = CRNotes::next_id(@redis, NOTE_KEY)
+			@redis[NOTE_KEY + @id + NAME_SUFFIX] = @name = name
+			@redis[NOTE_KEY + @id + TEXT_SUFFIX] = @text = ""
 			@loaded = true
+			@id
 		end
 		
 		def load
-			@name = @redis[@id + NAME_SUFFIX]
-			@text = @redis[@id + TEXT_SUFFIX]
+			@name = @redis[NOTE_KEY + @id + NAME_SUFFIX]
+			@text = @redis[NOTE_KEY + @id + TEXT_SUFFIX]
 			@loaded = true
 		end
 		
@@ -57,16 +61,20 @@ module CRNotes
 		end
 
 		def name=(newname)
-			@redis[@id + NAME_SUFFIX] = @name = newname
+			@redis[NOTE_KEY + @id + NAME_SUFFIX] = @name = newname
 		end
 		
 		def text=(newtext)
-			@redis[@id + TEXT_SUFFIX] = @text = newtext
+			@redis[NOTE_KEY + @id + TEXT_SUFFIX] = @text = newtext
 		end
 
 		def delete
-			@redis.del @id + NAME_SUFFIX
-			@redis.del @id + TEXT_SUFFIX
+			@redis.del NOTE_KEY + @id + NAME_SUFFIX
+			@redis.del NOTE_KEY + @id + TEXT_SUFFIX
+		end
+		
+		def to_json(*a)
+			{:id => id, :name => name, :text => text}.to_json(*a)
 		end
 		
 		def self.safe_name?(name)
@@ -89,7 +97,7 @@ module CRNotes
 		end
 		
 		def create(name)
-			@id = CRNotes::next_id(@redis, "user")
+			@id = CRNotes::next_id(@redis, USER_KEY)
 			self.name = name
 			@loaded = true
 		end
@@ -99,10 +107,9 @@ module CRNotes
 		end
 		
 		def load
-			@name = @redis[@id + NAME_SUFFIX]
-			@redis.hgetall(@id + NOTES_SUFFIX).each do |notename, note_id|
-			  note = Note.new @redis, note_id, false
-				@notes[notename] = note
+			@name = @redis[USER_KEY + @id + NAME_SUFFIX]
+			@redis.smembers(USER_KEY + @id + NOTES_SUFFIX).each do |noteid|
+				@notes[noteid] = Note.new @redis, noteid
 			end
 			@loaded = true
 		end
@@ -118,42 +125,31 @@ module CRNotes
 		end
 		
 		def name=(newname)
-			@redis[@id + NAME_SUFFIX] = @name = newname
+			@redis[USER_KEY + @id + NAME_SUFFIX] = @name = newname
 		end
 
 		def add_note(name)
-			return nil unless Note.safe_name? name
-			note = Note.new @redis, name, true
-			notes[note.name] = note
-			@redis.hset @id + NOTES_SUFFIX, note.name, note.id
-			return name
+			note = Note.new @redis, nil, name
+			notes[note.id] = note
+			@redis.sadd USER_KEY + @id + NOTES_SUFFIX, note.id
+			return note
 		end
 
-		def delete_note(name)
-			notes[name].delete
-			notes.delete(name)
-			@redis.hdel @id + NOTES_SUFFIX, name
+		def delete_note(id)
+			notes[id].delete
+			notes.delete(id)
+			@redis.srem USER_KEY + @id + NOTES_SUFFIX, id
 			return name
-		end
-
-		def rename_note(oldname, newname)
-			return nil unless Note.safe_name? newname
-			note = notes.delete(oldname)
-			note.name = newname
-			notes[newname] = note
-			@redis.hdel @id + NOTES_SUFFIX, oldname
-			@redis.hset @id + NOTES_SUFFIX, newname, note.id
-			return newname
 		end
 
 		def to_json(*a)
-			notes.keys.sort.to_json(*a)
+			notes.values.to_json(*a)
 		end
 
 		def delete
 			notes.values.each {|n| n.delete}
-			@redis.del @id + NAME_SUFFIX
-			@redis.del @id + NOTES_SUFFIX
+			@redis.del USER_KEY + @id + NAME_SUFFIX
+			@redis.del USER_KEY + @id + NOTES_SUFFIX
 		end
 	end
 
@@ -177,7 +173,7 @@ module CRNotes
 		end
 
 		def add_user(username)
-			return nil unless Note.safe_name? username
+			raise "UnsafeName" unless Note.safe_name? username
 			users[username] = User.new(@redis, username, true)
 			@redis.hset USERS_KEY, username, users[username].id
 			return username

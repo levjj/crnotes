@@ -14,12 +14,12 @@ TEST_FILES = FileList.new('spec/*_spec.rb')
 
 desc "Starts CRNotes server with thin"
 task :start do |t|
-	exec "thin -C thin.yml -R config.ru start"
+	system "thin -C thin.yml start"
 end
 
 desc "Stops CRNotes server with thin"
 task :stop do |t|
-	exec "thin -C thin.yml -R config.ru stop"
+	system "thin -C thin.yml stop" rescue nil
 end
 
 desc "Restarts CRNotes server with thin"
@@ -61,5 +61,4 @@ RDoc::Task.new('doc') do |rdoc|
 	]
 end
 
-task :default => :run
-
+task :default => :restart

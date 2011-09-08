@@ -13,7 +13,7 @@ describe CRNotes::Note do
 	before(:each) do
 		@redis = Redis.new :host => '127.0.0.1', :port => '6379', :db => 3
 		@redis.flushdb
-		@note = CRNotes::Note.new @redis, NOTE1, true
+		@note = CRNotes::Note.new @redis, nil, NOTE1
 	end
 
 	after(:each) do
@@ -29,6 +29,11 @@ describe CRNotes::Note do
 
 	it "has no text after creation" do
 		@note.text.empty?.should == true
+	end
+
+	it "allows changing the name" do
+		@note.name = NOTE2
+		@note.name.should == NOTE2
 	end
 
 	it "allows changing the text" do
@@ -56,71 +61,51 @@ describe CRNotes::User do
 	end
 
 	it "stores newly created empty notes" do
-		name = @user.add_note NOTE1
-		name.should == NOTE1
-		@user.notes.size.should == 1
-		note = @user.notes[NOTE1]
+		note = @user.add_note NOTE1
 		note.name.should == NOTE1
-		note.text.empty?.should == true
+		@user.notes.size.should == 1
+		note2 = @user.notes[note.id]
+		note2.name.should == NOTE1
+		note2.text.empty?.should == true
 		@redis.dbsize.should == 6
 	end
 
 	it "rejects note names with slashes" do
-		name = @user.add_note('/' + NOTE1)
-		name.nil?.should == true
+		lambda {@user.add_note('/' + NOTE1)}.should raise_error(RuntimeError)
 		@user.notes.empty?.should == true
 	end
 
 	it "rejects note names with nullbytes" do
-		name = @user.add_note('\0' + NOTE1)
-		name.nil?.should == true
+		lambda {@user.add_note('\0' + NOTE1)}.should raise_error(RuntimeError)
 		@user.notes.empty?.should == true
 	end
 
 	it "rejects empty note names" do
-		name = @user.add_note('')
-		name.nil?.should == true
+		lambda {@user.add_note('')}.should raise_error(RuntimeError)
 		@user.notes.empty?.should == true
 	end
 
 	it "rejects too long note names" do
-		name = @user.add_note('a' * 256)
-		name.nil?.should == true
+		lambda {@user.add_note('a' * 256)}.should raise_error(RuntimeError)
 		@user.notes.empty?.should == true
 	end
 
-	it "supports renaming of notes" do
-		@user.add_note NOTE1
-		@user.notes.size.should == 1
-		@user.notes.values[0].name.should == NOTE1
-		@user.rename_note(NOTE1, NOTE1 + "2")
-		@user.notes.size.should == 1
-		@user.notes.values[0].name.should == NOTE1 + "2"
-		@redis.dbsize.should == 6
-	end
-
 	it "supports deletion of notes" do
-		@user.add_note NOTE1
+		note = @user.add_note NOTE1
 		@user.notes.size.should == 1
-		@user.delete_note NOTE1
+		@user.delete_note note.id
 		@user.notes.empty?.should == true
 		@redis.dbsize.should == 3
 	end
 
 	it "serializes to JSON" do
 		@user.to_json.should ==  '[]'
-		@user.add_note NOTE1
-		@user.to_json.should ==  '["%s"]' % NOTE1
-	end
-
-	it "serializes multiple lists in alphabetic order to JSON" do
-		@user.add_note NOTE1
-		@user.add_note NOTE2
-		json = JSON.parse @user.to_json
-		json.size.should == 2
-		json[0].should == NOTE2
-		json[1].should == NOTE1
-		@redis.dbsize.should == 8
+		note = @user.add_note NOTE1
+		json = JSON.parse(@user.to_json)
+		(json.is_a? Array).should == true
+		json.size.should == 1
+		json[0]["id"].should == note.id
+		json[0]["name"].should == NOTE1
 	end
 end
 
@@ -153,26 +138,22 @@ describe CRNotes::DB do
 	end
 
 	it "rejects usernames with slashes" do
-		user = @db.add_user('/' + TESTUSER)
-		user.nil?.should == true
+		lambda {@db.add_user('/' + TESTUSER)}.should raise_error(RuntimeError)
 		@db.users.empty?.should == true
 	end
 
 	it "rejects usernames with nullbytes" do
-		user = @db.add_user('\0' + TESTUSER)
-		user.nil?.should == true
+		lambda {@db.add_user('\0' + TESTUSER)}.should raise_error(RuntimeError)
 		@db.users.empty?.should == true
 	end
 
 	it "rejects empty usernames" do
-		user = @db.add_user ''
-		user.nil?.should == true
+		lambda {@db.add_user('')}.should raise_error(RuntimeError)
 		@db.users.empty?.should == true
 	end
 
 	it "rejects too long usernames" do
-		user = @db.add_user('.' * 256)
-		user.nil?.should == true
+		lambda {@db.add_user('a' * 256)}.should raise_error(RuntimeError)
 		@db.users.empty?.should == true
 	end
 
